@@ -15,6 +15,7 @@ const (
 
 var usage string = `
 USAGE:
+  c2j [OPTIONS] [...PATH]
   c2j --delimiter -d <string>      choose a delimiter for csv
 
 EXAMPLE:
@@ -23,14 +24,16 @@ EXAMPLE:
 
 var (
 	errNotProviderArgs = errors.New("not provided any arguments")
+	errCommandNotFound = errors.New("command not found")
 )
 
-type argument struct {
+type option struct {
 	delimiter string
+	header    bool
 	//comment   string
 }
 
-func parse(arg *argument, args ...string) error {
+func parse(opt *option, args ...string) error {
 
 	if len(args) < 1 {
 		return nil
@@ -39,9 +42,9 @@ func parse(arg *argument, args ...string) error {
 	switch args[0] {
 	case CmdLongDelimiter,
 		CmdShortDelimiter:
-		arg.delimiter = args[1]
+		opt.delimiter = args[1]
 	default:
-		return errors.New("command not found")
+		return errCommandNotFound
 	}
 
 	return nil
@@ -51,26 +54,33 @@ func main() {
 
 	args := os.Args[1:]
 
-	arg := argument{
+	opt := option{
 		delimiter: ",",
 	}
 
-	err := parse(&arg, args...)
+	err := parse(&opt, args...)
 
 	must(err)
 
+	// reading from stdin
 	r := csv.NewReader(os.Stdin)
 
-	r.Comma = rune(arg.delimiter[0])
+	r.Comma = rune(opt.delimiter[0])
 	// r.Comment = rune(arg.comment[0])
 
 	lines, err := r.ReadAll()
 
 	must(err)
 
-	headers := mappingHeaders(lines)
+	if len(lines) < 1 {
+		must(errors.New("dont have any lines"))
+	}
 
-	fmt.Fprint(os.Stdout, generateJson(lines, headers))
+	jsonValue, err := generateJson(lines)
+
+	must(err)
+
+	fmt.Fprint(os.Stdout, jsonValue)
 }
 
 func must(err error) {
@@ -79,25 +89,39 @@ func must(err error) {
 	}
 }
 
-func mappingHeaders(lines [][]string) map[int]string {
-	headers := make(map[int]string)
-	for idy, line := range lines {
-		for idx, column := range line {
-			if idy == 0 {
-				headers[idx] = column
-			}
-		}
+// mappingHeaders mapping first line on csv
+func mappingHeaders(lines [][]string) (map[int]string, error) {
+
+	// header
+	line := lines[0]
+
+	if len(line) < 1 {
+		return nil, errors.New("dont have any columns")
 	}
-	return headers
+
+	headers := make(map[int]string)
+
+	for idx, column := range line {
+		headers[idx] = column
+	}
+
+	return headers, nil
 }
 
-func generateJson(lines [][]string, headers map[int]string) string {
+// generateJson
+func generateJson(lines [][]string) (string, error) {
+
+	headers, err := mappingHeaders(lines)
+
+	if err != nil {
+		return "", err
+	}
 
 	values := make([]map[string]string, 0)
 
 	for idy, line := range lines {
 
-		// should ignore headers?
+		// ignore headers if flag is activated
 		if idy == 0 {
 			continue
 		}
@@ -111,9 +135,11 @@ func generateJson(lines [][]string, headers map[int]string) string {
 		values = append(values, value)
 	}
 
-	valuesJson, err := json.Marshal(&values)
+	jsonValues, err := json.Marshal(&values)
 
-	must(err)
+	if err != nil {
+		return "", err
+	}
 
-	return string(valuesJson)
+	return string(jsonValues), nil
 }
