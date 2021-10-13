@@ -15,7 +15,7 @@ const (
 
 var usage string = `
 USAGE:
-  c2j [OPTIONS] [...PATH]
+  c2j [OPTION...]
   c2j --delimiter -d <string>      choose a delimiter for csv
 
 EXAMPLE:
@@ -29,8 +29,8 @@ var (
 
 type option struct {
 	delimiter string
+	comment   string
 	header    bool
-	//comment   string
 }
 
 func parse(opt *option, args ...string) error {
@@ -56,6 +56,7 @@ func main() {
 
 	opt := option{
 		delimiter: ",",
+		comment:   "#",
 	}
 
 	err := parse(&opt, args...)
@@ -66,7 +67,7 @@ func main() {
 	r := csv.NewReader(os.Stdin)
 
 	r.Comma = rune(opt.delimiter[0])
-	// r.Comment = rune(arg.comment[0])
+	r.Comment = rune(opt.comment[0])
 
 	lines, err := r.ReadAll()
 

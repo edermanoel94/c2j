@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -41,8 +40,6 @@ func TestMappingHeaders(t *testing.T) {
 	t.Run("should mapping headers", func(t *testing.T) {
 		lines := [][]string{
 			{"first_name", "last_name"},
-			{"eder", "costa"},
-			{"test", "test"},
 		}
 
 		headers, err := mappingHeaders(lines)
@@ -78,8 +75,10 @@ func TestGenerateJson(t *testing.T) {
 	lines := [][]string{
 		{"first_name", "last_name"},
 		{"eder", "costa"},
-		{"test", "test"},
+		{"teste", "teste"},
 	}
+
+  expected := `[{"first_name":"eder","last_name":"costa"},{"first_name":"teste","last_name":"teste"}]`
 
 	jsonString, err := generateJson(lines)
 
@@ -87,5 +86,7 @@ func TestGenerateJson(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Println(jsonString)
+	if jsonString != expected {
+		t.Errorf("given %s, want %s", jsonString, expected)
+	}
 }
