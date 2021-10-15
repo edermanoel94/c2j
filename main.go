@@ -1,146 +1,97 @@
 package main
 
 import (
-	"encoding/csv"
-	"encoding/json"
-	"errors"
+	"flag"
 	"fmt"
 	"os"
 )
 
 const (
-	CmdLongDelimiter  = "--delimiter"
-	CmdShortDelimiter = "-d"
+	version     = "0.0.1"
+	usageString = `Usage: c2j [flags]
+
+Flags:
+	-h, --help           print help information
+	-d, --delimiter      choose delimiter for csv
+	-v, --version        print version
+
+Examples:
+  cat comma.csv | c2j | jq        
+  cat semicolon.csv | c2j -delimiter ";" | jq`
 )
 
-var usage string = `
-USAGE:
-  c2j [OPTION...]
-  c2j --delimiter -d <string>      choose a delimiter for csv
-
-EXAMPLE:
-  cat example.csv | c2j --delimiter ";"
-`
-
+// flags
 var (
-	errNotProviderArgs = errors.New("not provided any arguments")
-	errCommandNotFound = errors.New("command not found")
+	fDelimiter string
+	fVersion   bool
+	fHelp      bool
 )
-
-type option struct {
-	delimiter string
-	comment   string
-	header    bool
-}
-
-func parse(opt *option, args ...string) error {
-
-	if len(args) < 1 {
-		return nil
-	}
-
-	switch args[0] {
-	case CmdLongDelimiter,
-		CmdShortDelimiter:
-		opt.delimiter = args[1]
-	default:
-		return errCommandNotFound
-	}
-
-	return nil
-}
 
 func main() {
+	flag.StringVar(&fDelimiter, "delimiter", "", "choose a delimiter")
+	flag.StringVar(&fDelimiter, "d", "", "choose a delimiter")
+	flag.BoolVar(&fVersion, "version", false, "print version")
+	flag.BoolVar(&fVersion, "v", false, "print version")
+	flag.BoolVar(&fHelp, "help", false, "print help")
+	flag.BoolVar(&fHelp, "h", false, "print help")
 
-	args := os.Args[1:]
+	flag.Usage = func() {
+		fmt.Fprintln(os.Stdout, usageString)
+		os.Exit(1)
+	}
+	flag.Parse()
 
-	opt := option{
-		delimiter: ",",
-		comment:   "#",
+	run()
+}
+
+func run() {
+	switch {
+	case fHelp:
+		fmt.Fprintf(os.Stdout, usageString)
+		os.Exit(0)
+	case fVersion:
+		printVersion()
+		os.Exit(0)
+	case fDelimiter != "":
+		// use customize delimiter
+		convert(fDelimiter)
+		os.Exit(0)
+	case fDelimiter == "" && flag.NArg() == 0 && (!fHelp || !fVersion):
+		// use standard delimiter, which is comma
+		convert(",")
+		os.Exit(0)
+	default:
+		fmt.Fprintf(os.Stdout, "flag provided but not defined %s \n", flag.Args()[0])
+		fmt.Fprintf(os.Stdout, usageString)
+		os.Exit(-1)
+	}
+}
+
+func printVersion() {
+	fmt.Fprintf(os.Stdout, version)
+}
+
+func convert(fDelimiter string) {
+
+	rows, err := readCsvFromStdin(fDelimiter)
+
+	must(err)
+
+	if len(rows) < 1 {
+		must(errEmptyInput)
 	}
 
-	err := parse(&opt, args...)
+	jsonContent, err := generateJson(rows)
 
 	must(err)
 
-	// reading from stdin
-	r := csv.NewReader(os.Stdin)
-
-	r.Comma = rune(opt.delimiter[0])
-	r.Comment = rune(opt.comment[0])
-
-	lines, err := r.ReadAll()
-
-	must(err)
-
-	if len(lines) < 1 {
-		must(errors.New("dont have any lines"))
-	}
-
-	jsonValue, err := generateJson(lines)
-
-	must(err)
-
-	fmt.Fprint(os.Stdout, jsonValue)
+	// NOTE: jq read from stdout, not from stderr
+	fmt.Fprint(os.Stdout, jsonContent)
 }
 
 func must(err error) {
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(-1)
 	}
-}
-
-// mappingHeaders mapping first line on csv
-func mappingHeaders(lines [][]string) (map[int]string, error) {
-
-	// header
-	line := lines[0]
-
-	if len(line) < 1 {
-		return nil, errors.New("dont have any columns")
-	}
-
-	headers := make(map[int]string)
-
-	for idx, column := range line {
-		headers[idx] = column
-	}
-
-	return headers, nil
-}
-
-// generateJson
-func generateJson(lines [][]string) (string, error) {
-
-	headers, err := mappingHeaders(lines)
-
-	if err != nil {
-		return "", err
-	}
-
-	values := make([]map[string]string, 0)
-
-	for idy, line := range lines {
-
-		// ignore headers if flag is activated
-		if idy == 0 {
-			continue
-		}
-
-		value := make(map[string]string)
-
-		for idx, column := range line {
-			value[headers[idx]] = column
-		}
-
-		values = append(values, value)
-	}
-
-	jsonValues, err := json.Marshal(&values)
-
-	if err != nil {
-		return "", err
-	}
-
-	return string(jsonValues), nil
 }
