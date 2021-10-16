@@ -18,6 +18,8 @@ go install github.com/edermanoel94/c2j
 
 ### Usage
 
+⚠️ CSV need to have header.
+
 #### Convert
 
 To convert, run the `c2j` command to read from **stdin**, using standard delimiter, which is *comma*.
