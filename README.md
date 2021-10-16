@@ -1,10 +1,12 @@
 # C2J
 
-A simple command line for convert **csv** into an array of **json**
+[![Go](https://github.com/edermanoel94/c2j/actions/workflows/go.yml/badge.svg)](https://github.com/edermanoel94/c2j/actions/workflows/go.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/edermanoel94/c2j)](https://goreportcard.com/report/github.com/edermanoel94/c2j)
+[![codecov](https://codecov.io/gh/edermanoel94/c2j/branch/master/graph/badge.svg)](https://codecov.io/gh/edermanoel94/c2j)
+
+A simple command line for convert **CSV** in **JSON**
 
 ## Install
-
-### Building from Source
 
 With Go 1.17 or higher:
 
@@ -13,6 +15,8 @@ go install github.com/edermanoel94/c2j
 ```
 
 ### Usage
+
+⚠️ CSV need to have header.
 
 #### Convert
 
@@ -36,8 +40,10 @@ $ cat example_semicolon.csv | c2j --delimiter ";"
 
 ## Todo
 
-
+- [ ] Convert without header
 - [ ] Use a path argument to convert
+- [ ] Save output to a file
+- [ ] Benchmark
 
 ## Contributing
 
@@ -46,3 +52,7 @@ Pull requests for new features, bug fixes, and suggestions are welcome!
 ## License
 
 [MIT](https://github.com/edermanoel94/c2j/blob/master/LICENSE)
+
+## Live
+
+I use [Twitch](https://twitch.tv/thegravidade) to stream, follow me, to see new features on this project.
