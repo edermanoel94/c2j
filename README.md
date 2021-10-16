@@ -8,8 +8,6 @@ A simple command line for convert **CSV** in **JSON**
 
 ## Install
 
-### Building from Source
-
 With Go 1.17 or higher:
 
 ```
