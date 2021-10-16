@@ -1,5 +1,7 @@
 # C2J
 
+[![Go](https://github.com/edermanoel94/c2j/actions/workflows/go.yml/badge.svg)](https://github.com/edermanoel94/c2j/actions/workflows/go.yml)
+
 A simple command line for convert **csv** into an array of **json**
 
 ## Install
