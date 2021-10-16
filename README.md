@@ -54,3 +54,7 @@ Pull requests for new features, bug fixes, and suggestions are welcome!
 ## License
 
 [MIT](https://github.com/edermanoel94/c2j/blob/master/LICENSE)
+
+## Live
+
+I use [Twitch](https://twitch.tv/thegravidade) to stream, follow me, to see new features on this project.
