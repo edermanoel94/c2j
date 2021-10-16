@@ -40,8 +40,10 @@ $ cat example_semicolon.csv | c2j --delimiter ";"
 
 ## Todo
 
-
+- [ ] Convert without header
 - [ ] Use a path argument to convert
+- [ ] Save output to a file
+- [ ] Benchmark
 
 ## Contributing
 
