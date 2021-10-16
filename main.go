@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	version     = "0.0.1"
+	version     = "0.1.0"
 	usageString = `Usage: c2j [flags]
 
 Flags:

@@ -1,42 +1,48 @@
 # C2J
 
-A simple command line for convert csv into an array of json
+A simple command line for convert **csv** into an array of **json**
 
-## Installation (WIP)
+## Install
 
-```
-go install
-```
+### Building from Source
 
-## Usage
+With Go 1.17 or higher:
 
 ```
-c2j [option]
-
-Flags:
--d, --delimiter                     Choose a delimiter for csv, example: "," or ";"
+go install github.com/edermanoel94/c2j
 ```
 
-## Examples
+### Usage
 
+#### Convert
 
-```
-cat CSV_FILE.csv | c2j | jq        
-sed 's/\,/\;/g' CSV_FILE.csv | c2j --delimiter ";" | jq
-```
-
-## Running tests
+To convert, run the `c2j` command to read from **stdin**, using standard delimiter, which is *comma*.
 
 ```
-go test
+$ cat example_comma.csv | c2j
 ```
 
-## Benchmarks (WIP)
+#### Convert with custom delimiter
+
+Use the `--delimiter` or `-d` flag to specify a delimiter.
 
 ```
-go test -bench=.
+$ cat example_semicolon.csv | c2j --delimiter ";"
 ```
 
-## References:
+#### Demo
 
-- [JQ](https://stedolan.github.io/jq/)
+![Demonstration](demo.gif)
+
+## Todo
+
+
+- [ ] Use a path argument to convert
+
+## Contributing
+
+Pull requests for new features, bug fixes, and suggestions are welcome!
+
+## License
+
+[MIT](https://github.com/edermanoel94/c2j/blob/master/LICENSE)
