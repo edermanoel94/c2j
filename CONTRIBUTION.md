@@ -20,7 +20,7 @@ git checkout -b my-new-feature
 - Commit your changes, if you have multiple commits, squase merge them into a single commit.
 
 ```
-git commit -am 'rest-go-my-new-feature - your descriptions about feature'
+git commit -am 'my-new-feature - your descriptions about feature'
 ```
 
 - Push to the feature branch.
