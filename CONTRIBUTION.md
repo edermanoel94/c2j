@@ -1,4 +1,4 @@
-Rest GO - Contributing
+C2J - Contributing
 ======================
 
 Any contributions to `c2j` should follow the following process and guidelines.
