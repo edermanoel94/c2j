@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/edermanoel94/c2j)](https://goreportcard.com/report/github.com/edermanoel94/c2j)
 [![codecov](https://codecov.io/gh/edermanoel94/c2j/branch/master/graph/badge.svg)](https://codecov.io/gh/edermanoel94/c2j)
 
-A simple command line for convert **csv** into an array of **json**
+A simple command line for convert **CSV** in **JSON**
 
 ## Install
 
