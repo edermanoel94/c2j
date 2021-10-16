@@ -9,7 +9,7 @@ import (
 
 // errors
 var (
-	errEmptyInput = errors.New("stdin is empty")
+	errEmptyInput = errors.New("empty data")
 )
 
 // mappingHeaders mapping first line on csv
