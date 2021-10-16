@@ -1,6 +1,7 @@
 # C2J
 
 [![Go](https://github.com/edermanoel94/c2j/actions/workflows/go.yml/badge.svg)](https://github.com/edermanoel94/c2j/actions/workflows/go.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/edermanoel94/c2j)](https://goreportcard.com/report/github.com/edermanoel94/c2j)
 
 A simple command line for convert **csv** into an array of **json**
 
