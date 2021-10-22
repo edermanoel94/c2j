@@ -4,78 +4,117 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"os"
 )
 
 // errors
 var (
-	errEmptyInput = errors.New("empty data")
+	errEmptyData = errors.New("empty data")
 )
 
-// mappingHeaders mapping first line on csv
-func mappingHeaders(rows [][]string) (map[int]string, error) {
+func mappingWithHeaders(rows [][]string) map[int]string {
 
-	// header
-	line := rows[0]
+	headerKeys := make(map[int]string)
 
-	if len(line) < 1 {
-		return nil, errors.New("dont have any columns")
+	row := rows[0]
+
+	for idx, column := range row {
+		headerKeys[idx] = column
 	}
 
-	headers := make(map[int]string)
+	return headerKeys
 
-	for idx, column := range line {
-		headers[idx] = column
-	}
-
-	return headers, nil
 }
 
-// generateJson
-func generateJson(rows [][]string) (string, error) {
+func mappingNoHeaders(rows [][]string) map[int]string {
 
-	headers, err := mappingHeaders(rows)
+	headerKeys := make(map[int]string)
 
-	if err != nil {
-		return "", err
+	columnsArr := make([]string, 0)
+
+	for i := 1; i <= len(rows[0]); i++ {
+		columnsArr = append(columnsArr, fmt.Sprintf("key_%d", i))
 	}
+
+	for idx, column := range columnsArr {
+		headerKeys[idx] = column
+	}
+
+	return headerKeys
+}
+
+// toJson
+func toJson(headerKeys map[int]string, rows [][]string) ([]byte, error) {
 
 	values := make([]map[string]string, 0)
 
-	for idy, line := range rows {
-
-		// ignore headers if flag is activated
-		if idy == 0 {
-			continue
-		}
+	for _, line := range rows {
 
 		value := make(map[string]string)
 
 		for idx, column := range line {
-			value[headers[idx]] = column
+			value[headerKeys[idx]] = column
 		}
 
 		values = append(values, value)
 	}
 
-	jsonValues, err := json.Marshal(&values)
-
-	if err != nil {
-		return "", err
-	}
-
-	return string(jsonValues), nil
+	return json.Marshal(&values)
 }
 
-// readCsvFromStdin
-func readCsvFromStdin(fDelimiter string) ([][]string, error) {
+func convert(reader io.Reader, delimiter string, noHeader bool) error {
 
-	// reading from stdin if not provide any path in argument
-	r := csv.NewReader(os.Stdin)
+	rows, err := csvFromReader(reader, delimiter)
 
-	r.Comma = rune(fDelimiter[0])
+	if err != nil {
+		return err
+	}
+
+	var headerKeys map[int]string
+
+	if noHeader {
+		headerKeys = mappingNoHeaders(rows)
+	} else {
+		headerKeys = mappingWithHeaders(rows)
+		// ignoring header
+		rows = rows[1:]
+	}
+
+	jsonBytes, err := toJson(headerKeys, rows)
+
+	if err != nil {
+		return err
+	}
+
+	// NOTE: jq read from stdout, not from stderr
+	fmt.Fprint(os.Stdout, string(jsonBytes))
+
+	return nil
+}
+
+// csvFromReader
+func csvFromReader(reader io.Reader, delimiter string) ([][]string, error) {
+
+	//TODO: reading from stdin if not provide any path in argument
+	r := csv.NewReader(reader)
+
+	r.Comma = rune(delimiter[0])
 	// TODO: customize comment on csv file
 	r.Comment = '#'
 
-	return r.ReadAll()
+	rows, err := r.ReadAll()
+
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(rows)
+
+	if len(rows) < 1 {
+		return nil, errEmptyData
+	}
+
+	return rows, nil
 }
