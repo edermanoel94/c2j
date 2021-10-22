@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	version     = "0.1.0"
+	version     = "0.1.2"
 	usageString = `Usage: c2j [flags]
 
 Flags:
 	-h, --help           print help information
 	-d, --delimiter      choose delimiter for csv
-	-v, --version        print version
+  -v, --version        print version
 
 Examples:
   cat comma.csv | c2j | jq        
@@ -47,7 +47,7 @@ func main() {
 func run() {
 	switch {
 	case fHelp:
-		fmt.Fprintf(os.Stdout, usageString)
+		printUsage()
 		os.Exit(0)
 	case fVersion:
 		printVersion()
@@ -62,7 +62,7 @@ func run() {
 		os.Exit(0)
 	default:
 		fmt.Fprintf(os.Stdout, "flag provided but not defined %s \n", flag.Args()[0])
-		fmt.Fprintf(os.Stdout, usageString)
+		printUsage()
 		os.Exit(-1)
 	}
 }
@@ -71,24 +71,11 @@ func printVersion() {
 	fmt.Fprintf(os.Stdout, version)
 }
 
-func convert(fDelimiter string) {
-
-	rows, err := readCsvFromStdin(fDelimiter)
-
-	must(err)
-
-	if len(rows) < 1 {
-		must(errEmptyInput)
-	}
-
-	jsonContent, err := generateJson(rows)
-
-	must(err)
-
-	// NOTE: jq read from stdout, not from stderr
-	fmt.Fprint(os.Stdout, jsonContent)
+func printUsage() {
+	fmt.Fprintf(os.Stdout, usageString)
 }
 
+// must
 func must(err error) {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

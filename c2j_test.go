@@ -1,19 +1,18 @@
 package main
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestMappingHeaders(t *testing.T) {
 
-	t.Run("should mapping headers", func(t *testing.T) {
-		lines := [][]string{
+	t.Run("should mapping headers with defined", func(t *testing.T) {
+		rows := [][]string{
 			{"first_name", "last_name"},
 		}
 
-		headers, err := mappingHeaders(lines)
-
-		if err != nil {
-			t.Fatal(err)
-		}
+		headers := mappingHeaders(true, rows)
 
 		if headers[0] != "first_name" {
 			t.Errorf("want %s, given %s", "first_name", headers[0])
@@ -24,36 +23,59 @@ func TestMappingHeaders(t *testing.T) {
 		}
 	})
 
-	t.Run("should give a error for not have any columns but have one line", func(t *testing.T) {
-		lines := [][]string{
+	t.Run("should mapping headers without defined", func(t *testing.T) {
+		rows := [][]string{
+			{"eder", "manoel"},
+			{"something", "joao"},
+		}
+
+		expected := map[int]string{
+			0: "key_1",
+			1: "key_2",
+		}
+
+		headers := mappingHeaders(false, rows)
+
+		if !reflect.DeepEqual(headers, expected) {
+      t.Errorf("should be deep equal, expected: %v, got: %v", expected, headers)
+		}
+	})
+
+	t.Run("should be empty", func(t *testing.T) {
+		rows := [][]string{
 			{},
 		}
 
-		_, err := mappingHeaders(lines)
+		headers := mappingHeaders(true, rows)
 
-		if err == nil {
-			t.Fatal(err)
+		if len(headers) > 0 {
+      t.Errorf("len shouldnt be greater than zero, expected: %d, got: %d", 0, len(headers))
 		}
 	})
 }
 
-func TestGenerateJson(t *testing.T) {
+func TestToJson(t *testing.T) {
 
-	lines := [][]string{
+	rows := [][]string{
 		{"first_name", "last_name"},
 		{"eder", "costa"},
 		{"teste", "teste"},
 	}
 
+	headerKeys := map[int]string{
+		0: "first_name",
+		1: "last_name",
+	}
+
 	expected := `[{"first_name":"eder","last_name":"costa"},{"first_name":"teste","last_name":"teste"}]`
 
-	jsonString, err := generateJson(lines)
+	jsonBytes, err := toJson(headerKeys, rows)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if jsonString != expected {
-		t.Errorf("given %s, want %s", jsonString, expected)
+	if string(jsonBytes) != expected {
+		t.Errorf("given %s, want %s", jsonBytes, expected)
 	}
 }

@@ -3,3 +3,4 @@ vendor
 .idea
 .code
 *.csv
+coverage.txt

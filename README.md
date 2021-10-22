@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/edermanoel94/c2j)](https://goreportcard.com/report/github.com/edermanoel94/c2j)
 [![codecov](https://codecov.io/gh/edermanoel94/c2j/branch/master/graph/badge.svg)](https://codecov.io/gh/edermanoel94/c2j)
 
-A simple command line for convert **CSV** in **JSON**
+A simple command line for convert **CSV** in **JSON** list of objects based on header.
 
 ## Install
 
@@ -16,11 +16,9 @@ go install github.com/edermanoel94/c2j
 
 ### Usage
 
-⚠️ CSV need to have header.
-
 #### Convert
 
-To convert, run the `c2j` command to read from **stdin**, using standard delimiter, which is *comma*.
+To convert, run the `c2j` command to read from **STDIN**, using standard delimiter, which is *comma*.
 
 ```
 $ cat example_comma.csv | c2j
@@ -28,7 +26,7 @@ $ cat example_comma.csv | c2j
 
 #### Convert with custom delimiter
 
-Use the `--delimiter` or `-d` flag to specify a delimiter.
+Use the `--delimiter` or short version`-d` flag to specify a delimiter.
 
 ```
 $ cat example_semicolon.csv | c2j --delimiter ";"
@@ -40,8 +38,8 @@ $ cat example_semicolon.csv | c2j --delimiter ";"
 
 ## Todo
 
-- [ ] Convert without header
-- [ ] Use a path argument to convert
+- [ ] Convert without header and generate keys based on index (WIP)
+- [ ] Use a path to file argument for convert
 - [ ] Save output to a file
 - [ ] Benchmark
 
