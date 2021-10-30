@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -74,31 +77,51 @@ func TestToJson(t *testing.T) {
 
 	expected := `[{"first_name":"eder","last_name":"costa"},{"first_name":"teste","last_name":"teste"}]`
 
-	jsonBytes, err := toJson(headerKeys, rows)
+	jsonOutputBytes, err := toJson(headerKeys, rows)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if string(jsonBytes) != expected {
-		t.Errorf("given %s, want %s", jsonBytes, expected)
+	if string(jsonOutputBytes) != expected {
+		t.Errorf("given %s, want %s", jsonOutputBytes, expected)
 	}
 }
 
 func TestConvert(t *testing.T) {
 
-	csvInput := `
-first_name,last_name,phone
-Charleen,Roche,253-330-9889
-Jenica,Briat,393-963-9525
-Julie,Josselsohn,898-929-2639
-Maddalena,Bessom,479-862-0782
-Collete,Feldklein,143-902-5122
+	t.Run("should convert with standard delimiter and with header", func(t *testing.T) {
+
+		csvInput := `
+first_name,last_name
+eder,costa
+teste,teste
 `
 
-	err := convert(strings.NewReader(csvInput), ",", true)
+		jsonExpected := fmt.Sprintln(`[{"first_name":"eder","last_name":"costa"},{"first_name":"teste","last_name":"teste"}]`)
 
-	if err != nil {
-		t.Errorf("%v", err)
-	}
+		tmpFile, err := ioutil.TempFile("", "*")
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		defer os.Remove(tmpFile.Name())
+
+		err = convert(strings.NewReader(csvInput), tmpFile, ",", false)
+
+		if err != nil {
+			t.Error(err)
+		}
+
+		jsonOutputBytes, err := ioutil.ReadFile(tmpFile.Name())
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if jsonExpected != string(jsonOutputBytes) {
+			t.Errorf("given %s, want %s", string(jsonOutputBytes), jsonExpected)
+		}
+	})
 }

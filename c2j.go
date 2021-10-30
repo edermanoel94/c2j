@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 )
 
 var (
@@ -63,9 +62,9 @@ func toJson(headerKeys map[int]string, rows [][]string) ([]byte, error) {
 	return json.Marshal(&values)
 }
 
-func convert(reader io.Reader, delimiter string, noHeader bool) error {
+func convert(src io.Reader, dst io.Writer, delimiter string, noHeader bool) error {
 
-	rows, err := csvFromReader(reader, delimiter)
+	rows, err := csvFromReader(src, delimiter)
 
 	if err != nil {
 		return err
@@ -88,7 +87,7 @@ func convert(reader io.Reader, delimiter string, noHeader bool) error {
 	}
 
 	// NOTE: jq read from stdout, not from stderr
-	fmt.Fprint(os.Stdout, fmt.Sprintf("%s\n", string(jsonBytes)))
+	fmt.Fprintln(dst, fmt.Sprintf("%s", string(jsonBytes)))
 
 	return nil
 }

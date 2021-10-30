@@ -4,3 +4,4 @@ vendor
 .code
 *.csv
 coverage.txt
+*.vim

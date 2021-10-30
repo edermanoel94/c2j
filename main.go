@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
+	"log"
 	"os"
 )
 
@@ -12,29 +14,33 @@ const (
 
 Flags:
 	-h, --help           print help information
-  -v, --version        print version
-	-d, --delimiter      choose delimiter for csv
-	-H, --no-header      parse csv without header, generating a key based on indexes
+        -v, --version        print version
+	-d, --delimiter      choose delimiter for parse csv
+	-H, --no-header      parse csv without header fields, generating a key based on indexes
+	-o, --output         save output to a file
 
 Examples:
-  cat comma.csv              | c2j | jq        
-  cat semicolon.csv          | c2j --delimiter ";" | jq
-  cat csv_without_header.csv | c2j --no-header | jq
-
+  cat comma.csv              | c2j
+  cat semicolon.csv          | c2j --delimiter ";"
+  cat csv_without_header.csv | c2j --no-header
 `
 )
 
 // flags
 var (
+	// TODO: check if fDelimiter working with \t
 	fDelimiter string
 	fNoHeader  bool
 	fVersion   bool
 	fHelp      bool
+	fOutput    string
 )
 
 func main() {
 	flag.StringVar(&fDelimiter, "delimiter", "", "choose a delimiter")
 	flag.StringVar(&fDelimiter, "d", "", "choose a delimiter")
+	flag.StringVar(&fOutput, "output", "", "save output to a file")
+	flag.StringVar(&fOutput, "o", "", "save output to a file")
 	flag.BoolVar(&fNoHeader, "no-header", false, "parse csv without header")
 	flag.BoolVar(&fNoHeader, "H", false, "parse csv without header")
 	flag.BoolVar(&fVersion, "version", false, "print version")
@@ -60,15 +66,13 @@ func run() {
 		printVersion()
 		os.Exit(0)
 	case fDelimiter != "":
-		if err := convert(os.Stdin, fDelimiter, fNoHeader); err != nil {
-			fmt.Fprintf(os.Stderr, err.Error())
-			os.Exit(-1)
+		if err := convert(os.Stdin, writerDst(fOutput), fDelimiter, fNoHeader); err != nil {
+			log.Fatalf("failed to convert with %v", err)
 		}
 		os.Exit(0)
 	case fDelimiter == "" && flag.NArg() == 0 && (!fHelp || !fVersion):
-		if err := convert(os.Stdin, ",", fNoHeader); err != nil {
-			fmt.Fprintf(os.Stderr, err.Error())
-			os.Exit(-1)
+		if err := convert(os.Stdin, writerDst(fOutput), ",", fNoHeader); err != nil {
+			log.Fatalf("failed to convert with %v", err)
 		}
 		os.Exit(0)
 	default:
@@ -84,4 +88,16 @@ func printVersion() {
 
 func printUsage() {
 	fmt.Fprintf(os.Stdout, usageString)
+}
+
+func writerDst(outputFile string) io.Writer {
+	if outputFile != "" {
+		file, err := os.Create(outputFile)
+		if err != nil {
+			log.Fatalf("couldnt create file: %v", err)
+		}
+		return file
+	}
+
+	return os.Stdout
 }

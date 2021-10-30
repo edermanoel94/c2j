@@ -50,6 +50,7 @@ Technically none of these are "required", but they `c2j` so much prettier.
 | -------------------- | ----------------------------------------- |
 | `-d` `--delimiter`   | Choose a delimiter for parse CSV
 | `-H` `--no-header`   | CSV without header fields
+| `-o` `--output`      | Save output to a file
 
 ## Exit Codes
 
