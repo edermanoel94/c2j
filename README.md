@@ -32,16 +32,41 @@ Use the `--delimiter` or short version`-d` flag to specify a delimiter.
 $ cat example_semicolon.csv | c2j --delimiter ";"
 ```
 
-#### Demo
+## Requirements
+
+Technically none of these are "required", but they `c2j` so much prettier.
+
+### Command-line JSON processor
+
+[**jq**](https://github.com/stedolan/jq)
+
+`c2j` does not come with json pretty, yet, will be added in future releases.
+
+`some_csv.csv | c2j <flags> | jq`
+
+## Flags
+
+| Name                 | Function                                  |
+| -------------------- | ----------------------------------------- |
+| `-d` `--delimiter`   | Choose a delimiter for parse CSV
+| `-H` `--no-header`   | CSV without header fields
+
+## Exit Codes
+
+| Code                 | Meaning                                  |
+| -------------------- | ---------------------------------------- |
+| `0`                  | Good
+| `-1`                 | Bad
+
+## Demo
 
 ![Demonstration](demo.gif)
 
 ## Todo
 
 - [x] Convert without header and generate keys based on index
-- [ ] Use a path to file argument for convert
 - [ ] Save output to a file
-- [ ] Benchmark
+- [ ] Add a pretty output
 
 ## Contributing
 
