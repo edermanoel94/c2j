@@ -1,7 +1,7 @@
 package main
 
 import (
-	"reflect"
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -38,28 +38,6 @@ func TestMappingWithHeaders(t *testing.T) {
 	})
 }
 
-func TestMappingNoHeaders(t *testing.T) {
-
-	t.Run("should mapping without headers", func(t *testing.T) {
-		rows := [][]string{
-			{"eder", "manoel"},
-			{"something", "joao"},
-		}
-
-		expected := map[int]string{
-			0: "key_1",
-			1: "key_2",
-		}
-
-		headers := mappingNoHeaders(rows)
-
-		if !reflect.DeepEqual(headers, expected) {
-			t.Errorf("should be deep equal, expected: %v, got: %v", expected, headers)
-		}
-	})
-
-}
-
 func TestToJson(t *testing.T) {
 
 	rows := [][]string{
@@ -87,7 +65,9 @@ func TestToJson(t *testing.T) {
 
 func TestConvert(t *testing.T) {
 
-	csvInput := `
+	t.Run("convert", func(t *testing.T) {
+
+		csvInput := `
 first_name,last_name,phone
 Charleen,Roche,253-330-9889
 Jenica,Briat,393-963-9525
@@ -96,9 +76,44 @@ Maddalena,Bessom,479-862-0782
 Collete,Feldklein,143-902-5122
 `
 
-	err := convert(strings.NewReader(csvInput), ",", true)
+		data, err := convert(strings.NewReader(csvInput), ",", false)
 
-	if err != nil {
-		t.Errorf("%v", err)
-	}
+		if err != nil {
+			t.Errorf("%v", err)
+		}
+
+		if data == "" {
+			t.Errorf("data couldn't be empty")
+		}
+
+		if !json.Valid([]byte(data)) {
+			t.Errorf("data is not a valid json")
+		}
+	})
+
+	t.Run("convert without header", func(t *testing.T) {
+
+		csvInput := `
+first_name,last_name,phone
+Charleen,Roche,253-330-9889
+Jenica,Briat,393-963-9525
+Julie,Josselsohn,898-929-2639
+Maddalena,Bessom,479-862-0782
+Collete,Feldklein,143-902-5122
+`
+
+		data, err := convert(strings.NewReader(csvInput), ",", true)
+
+		if err != nil {
+			t.Errorf("%v", err)
+		}
+
+		if data == "" {
+			t.Errorf("data couldn't be empty")
+		}
+
+		if !json.Valid([]byte(data)) {
+			t.Errorf("data is not a valid json")
+		}
+	})
 }

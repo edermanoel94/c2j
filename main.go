@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	version     = "0.1.6\n"
+	version     = "0.1.7\n"
 	usageString = `Usage: c2j [flags]
 
 Flags:
@@ -19,9 +19,7 @@ Flags:
 Examples:
   cat comma.csv              | c2j | jq        
   cat semicolon.csv          | c2j --delimiter ";" | jq
-  cat csv_without_header.csv | c2j --no-header | jq
-
-`
+  cat csv_without_header.csv | c2j --no-header | jq`
 )
 
 // flags
@@ -35,7 +33,7 @@ var (
 func main() {
 	flag.StringVar(&fDelimiter, "delimiter", "", "choose a delimiter")
 	flag.StringVar(&fDelimiter, "d", "", "choose a delimiter")
-	flag.BoolVar(&fNoHeader, "no-header", false, "parse csv without header")
+	flag.BoolVar(&fNoHeader, "no-header", false, "parse csv without header, this will use matrices")
 	flag.BoolVar(&fNoHeader, "H", false, "parse csv without header")
 	flag.BoolVar(&fVersion, "version", false, "print version")
 	flag.BoolVar(&fVersion, "v", false, "print version")
@@ -44,7 +42,7 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stdout, usageString)
-		os.Exit(1)
+		os.Exit(0)
 	}
 	flag.Parse()
 
@@ -60,16 +58,20 @@ func run() {
 		printVersion()
 		os.Exit(0)
 	case fDelimiter != "":
-		if err := convert(os.Stdin, fDelimiter, fNoHeader); err != nil {
+		output, err := convert(os.Stdin, fDelimiter, fNoHeader)
+		if err != nil {
 			fmt.Fprintf(os.Stderr, err.Error())
 			os.Exit(-1)
 		}
+		fmt.Fprint(os.Stdout, fmt.Sprintf("%s\n", string(output)))
 		os.Exit(0)
 	case fDelimiter == "" && flag.NArg() == 0 && (!fHelp || !fVersion):
-		if err := convert(os.Stdin, ",", fNoHeader); err != nil {
+		output, err := convert(os.Stdin, ",", fNoHeader)
+		if err != nil {
 			fmt.Fprintf(os.Stderr, err.Error())
 			os.Exit(-1)
 		}
+		fmt.Fprint(os.Stdout, fmt.Sprintf("%s\n", string(output)))
 		os.Exit(0)
 	default:
 		fmt.Fprintf(os.Stdout, "flag provided but not defined %s \n", flag.Args()[0])
