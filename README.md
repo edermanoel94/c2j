@@ -62,12 +62,6 @@ Technically none of these are "required", but they `c2j` so much prettier.
 
 ![Demonstration](demo.gif)
 
-## Todo
-
-- [x] Convert without header and generate keys based on index
-- [ ] Save output to a file
-- [ ] Add a pretty output
-
 ## Contributing
 
 Pull requests for new features, bug fixes, and suggestions are welcome!
