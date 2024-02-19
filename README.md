@@ -8,10 +8,10 @@ A simple command line for convert **CSV** in **JSON** list of objects based on h
 
 ## Install
 
-With Go 1.17 or higher:
+With Go 1.21 or higher:
 
 ```
-go install github.com/edermanoel94/c2j
+go install github.com/edermanoel94/c2j@latest
 ```
 
 ### Usage
