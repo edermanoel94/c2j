@@ -14,7 +14,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: 1.21
     - name: Run test
       run: go test -v ./...
 
@@ -26,7 +26,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: 1.21
     - name: Run coverage
       run: go test -race -coverprofile=coverage.txt -covermode=atomic
     - name: Upload coverage to Codecov
