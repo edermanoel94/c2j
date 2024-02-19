@@ -4,13 +4,11 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
-	"os"
 )
 
 var (
-	errEmptyData = errors.New("empty data")
+	errFormatCsvFile = errors.New("empty file or not format withj csv")
 )
 
 func mappingWithHeaders(rows [][]string) map[int]string {
@@ -27,24 +25,6 @@ func mappingWithHeaders(rows [][]string) map[int]string {
 
 }
 
-func mappingNoHeaders(rows [][]string) map[int]string {
-
-	headerKeys := make(map[int]string)
-
-	columnsArr := make([]string, 0)
-
-	for i := 1; i <= len(rows[0]); i++ {
-		columnsArr = append(columnsArr, fmt.Sprintf("key_%d", i))
-	}
-
-	for idx, column := range columnsArr {
-		headerKeys[idx] = column
-	}
-
-	return headerKeys
-}
-
-// toJson
 func toJson(headerKeys map[int]string, rows [][]string) ([]byte, error) {
 
 	values := make([]map[string]string, 0)
@@ -63,37 +43,43 @@ func toJson(headerKeys map[int]string, rows [][]string) ([]byte, error) {
 	return json.Marshal(&values)
 }
 
-func convert(reader io.Reader, delimiter string, noHeader bool) error {
+func convert(reader io.Reader, delimiter string, noHeader bool) (string, error) {
 
 	rows, err := csvFromReader(reader, delimiter)
 
 	if err != nil {
-		return err
+		return "", err
+	}
+
+	if noHeader {
+
+		rows = rows[1:]
+
+		jsonBytes, err := json.Marshal(rows)
+
+		if err != nil {
+
+			return "", err
+		}
+
+		return string(jsonBytes), nil
 	}
 
 	var headerKeys map[int]string
 
-	if noHeader {
-		headerKeys = mappingNoHeaders(rows)
-	} else {
-		headerKeys = mappingWithHeaders(rows)
-		// ignoring header
-		rows = rows[1:]
-	}
+	headerKeys = mappingWithHeaders(rows)
+
+	rows = rows[1:]
 
 	jsonBytes, err := toJson(headerKeys, rows)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	// NOTE: jq read from stdout, not from stderr
-	fmt.Fprint(os.Stdout, fmt.Sprintf("%s\n", string(jsonBytes)))
-
-	return nil
+	return string(jsonBytes), nil
 }
 
-// csvFromReader
 func csvFromReader(reader io.Reader, delimiter string) ([][]string, error) {
 
 	//TODO: reading from stdin if not provide any path in argument
@@ -110,7 +96,7 @@ func csvFromReader(reader io.Reader, delimiter string) ([][]string, error) {
 	}
 
 	if len(rows) < 1 {
-		return nil, errEmptyData
+		return nil, errFormatCsvFile
 	}
 
 	return rows, nil
