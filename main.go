@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -46,19 +47,17 @@ func main() {
 	}
 	flag.Parse()
 
-	run()
+	run(os.Stdin)
 }
 
-func run() {
+func run(reader io.Reader) {
 	switch {
 	case fHelp:
 		printUsage()
-		os.Exit(0)
 	case fVersion:
 		printVersion()
-		os.Exit(0)
 	case fDelimiter != "":
-		output, err := convert(os.Stdin, fDelimiter, fNoHeader)
+		output, err := convert(reader, fDelimiter, fNoHeader)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, err.Error())
 			os.Exit(-1)
@@ -66,7 +65,7 @@ func run() {
 		fmt.Fprint(os.Stdout, fmt.Sprintf("%s\n", string(output)))
 		os.Exit(0)
 	case fDelimiter == "" && flag.NArg() == 0 && (!fHelp || !fVersion):
-		output, err := convert(os.Stdin, ",", fNoHeader)
+		output, err := convert(reader, ",", fNoHeader)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, err.Error())
 			os.Exit(-1)

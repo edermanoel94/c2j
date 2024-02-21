@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	errFormatCsvFile = errors.New("empty file or not format withj csv")
+	errFormatCsvFile = errors.New("empty file or not format with csv")
 )
 
 func mappingWithHeaders(rows [][]string) map[int]string {
@@ -82,11 +82,9 @@ func convert(reader io.Reader, delimiter string, noHeader bool) (string, error) 
 
 func csvFromReader(reader io.Reader, delimiter string) ([][]string, error) {
 
-	//TODO: reading from stdin if not provide any path in argument
 	r := csv.NewReader(reader)
 
 	r.Comma = rune(delimiter[0])
-	// TODO: customize comment on csv file
 	r.Comment = '#'
 
 	rows, err := r.ReadAll()
